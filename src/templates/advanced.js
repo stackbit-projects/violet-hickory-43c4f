@@ -1,31 +1,24 @@
-import React from 'react';
-import _ from 'lodash';
-import {graphql} from 'gatsby';
+import pandas as pd
+import numpy as np
+df=pd.read_csv(r"Z:\\Navneeta\\Postman-Assignment\\employee.csv",
+               sep=',',engine='python')
+print(df)
+df.head(5)
 
-import components, {Layout} from '../components/index';
+for col in df.columns:
+    print(col)
+ 
+df['Date of Birth']=pd.to_datetime(df['Date of Birth'])
+df['Date of Joining']=pd.to_datetime(df['Date of Joining'])
+display(df[['Date of Birth','Date of Joining']])
 
-// this minimal GraphQL query ensures that when 'gatsby develop' is running,
-// any changes to content files are reflected in browser
-export const query = graphql`
-  query($url: String) {
-    sitePage(path: {eq: $url}) {
-      id
-    }
-  }
-`;
+df['Emp Name']=df['First Name'].map(str)+' '+df['Last Name'].map(str)
+print(df.head(5))
 
-export default class Advanced extends React.Component {
-    render() {
-        return (
-            <Layout {...this.props}>
-            {_.map(_.get(this.props, 'pageContext.frontmatter.sections', null), (section, section_idx) => {
-                let component = _.upperFirst(_.camelCase(_.get(section, 'type', null)));
-                let Component = components[component];
-                return (
-                  <Component key={section_idx} {...this.props} section={section} site={this.props.pageContext.site} />
-                )
-            })}
-            </Layout>
-        );
-    }
-}
+grouped_data=df.groupby(['Quarter of Joining','Emp Name'])['Quarter of Joining'].agg({'Date of Birth':'count'})
+grouped_data.sort_values('Date of Birth',ascending=False,inplace=True)
+
+print(grouped_data)
+
+Print_data = {k:list(grouped_data.loc[k].index) for k in grouped_data.index.levels[0]}
+print(Print_data)
